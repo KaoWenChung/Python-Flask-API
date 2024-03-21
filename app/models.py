@@ -1,3 +1,4 @@
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
 from typing import Optional
 import sqlalchemy as sa
@@ -14,6 +15,12 @@ class User(db.Model):
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
+    def set_password(self, password):
+        self.passowrd_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.passowrd_hash, password)
+
 class Post(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     body: so.Mapped[str] = so.mapped_column(sa.String(140))
@@ -26,3 +33,4 @@ class Post(db.Model):
 
     def __repr__(self):
         return '<Post {}>'.format(self.body)
+
