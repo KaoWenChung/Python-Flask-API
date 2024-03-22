@@ -1,9 +1,10 @@
-import sqlalchemy as sa
 from flask import render_template, flash, redirect, request
 from flask_login import current_user, login_user, logout_user, login_required
+import sqlalchemy as sa
 from app import db
 from app import app
 from app.forms import LoginForm
+from app.forms import RegistrationForm
 from app.models import User
 from urllib.parse import urlsplit
 
@@ -11,7 +12,6 @@ from urllib.parse import urlsplit
 @app.route('/index')
 @login_required
 def index():
-    user = {'username': 'Owen'}
     posts = [
         {
             'author': {'username': 'Mike'},
@@ -22,7 +22,7 @@ def index():
             'body': 'Having a dating with Connor'
         }
     ]
-    return render_template('index.html', title='Home', posts=posts)
+    return render_template("index.html", title='Home Page', posts=posts)
     
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -40,6 +40,21 @@ def login():
         if not next_page or urlsplit(next_page).netloc != '':
             next_page = url_for('index')
         return redirect(next_page)
+    return render_template('login.html', title='Sign In', form=form)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user!')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
 
 @app.route('/logout')
 def logout():
