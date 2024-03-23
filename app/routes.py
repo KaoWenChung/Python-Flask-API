@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, request
+from flask import render_template, flash, redirect, request, url_for
 from flask_login import current_user, login_user, logout_user, login_required
 import sqlalchemy as sa
 from app import db
@@ -32,6 +32,7 @@ def login():
     if form.validate_on_submit():
         user = db.session.scalar(
             sa.select(User).where(User.username == form.username.data))
+        print()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
